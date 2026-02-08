@@ -44,7 +44,7 @@ export async function GET() {
         env: {
           hasProjectUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
           hasPublishableKey: !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-          hasSecretKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          hasSecretKey: !!process.env.SUPABASE_SECRET_KEY,
         },
       },
     });
