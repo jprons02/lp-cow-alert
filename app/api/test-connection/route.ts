@@ -42,9 +42,9 @@ export async function GET() {
           currentUser: user ? "authenticated" : "anonymous",
         },
         env: {
-          hasProjectUrl: !!process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL,
+          hasProjectUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
           hasPublishableKey: !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-          hasSecretKey: !!process.env.SUPABASE_SECRET_KEY,
+          hasSecretKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
         },
       },
     });
