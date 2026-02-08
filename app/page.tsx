@@ -131,6 +131,14 @@ export default function Home() {
             Spotted a cow outside the fence? Tap the button above to alert the
             ranger. No account needed.
           </p>
+
+          {/* Disclaimer */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
+            <p className="text-xs text-amber-800 font-medium">
+              ⚠️ This website is not connected to notify the rancher. This is
+              just a demo.
+            </p>
+          </div>
         </div>
       </main>
     </div>
