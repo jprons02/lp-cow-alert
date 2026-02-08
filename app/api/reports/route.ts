@@ -8,6 +8,24 @@ export async function POST(request: Request) {
 
     const supabase = await createAdminClient();
 
+    // Check if there's already an active report at this location
+    const { data: existingReport } = await supabase
+      .from("reports")
+      .select("id")
+      .eq("location", location)
+      .in("status", ["reported", "acknowledged"])
+      .maybeSingle();
+
+    if (existingReport) {
+      return NextResponse.json(
+        {
+          error:
+            "This location already has an active report. Rangers have been notified.",
+        },
+        { status: 409 },
+      );
+    }
+
     const { data, error } = await supabase
       .from("reports")
       .insert({
