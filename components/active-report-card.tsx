@@ -1,6 +1,6 @@
 import type { Report } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Clock, CheckCircle2, MapPin } from "lucide-react";
 
 function getTimeSince(dateString: string): string {
   const now = new Date();
@@ -64,8 +64,9 @@ export function ActiveReportCard({ report }: { report: Report }) {
       </p>
 
       {report.location && (
-        <p className="mt-2 text-sm text-muted-foreground">
-          📍 {report.location}
+        <p className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
+          <MapPin className="size-4" />
+          {report.location}
         </p>
       )}
 

@@ -12,8 +12,26 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Megaphone, Loader2, CheckCircle2 } from "lucide-react";
+import { Megaphone, Loader2, CheckCircle2, MapPin } from "lucide-react";
+import {
+  PREDEFINED_LOCATIONS,
+  OTHER_LOCATION_ID,
+  getLocationById,
+} from "@/lib/locations";
+import dynamic from "next/dynamic";
+
+const LocationMap = dynamic(
+  () => import("@/components/location-map").then((mod) => mod.LocationMap),
+  { ssr: false },
+);
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -24,13 +42,31 @@ export function ReportCowDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationId, setLocationId] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const selectedLocation = getLocationById(locationId);
+  const isOtherSelected = locationId === OTHER_LOCATION_ID;
 
   async function handleSubmit() {
     setFormState("submitting");
     setErrorMessage("");
+
+    // Determine final location string
+    let finalLocation: string | null = null;
+    if (isOtherSelected) {
+      finalLocation = customLocation.trim() || null;
+    } else if (selectedLocation) {
+      finalLocation = selectedLocation.name;
+    }
+
+    if (!finalLocation) {
+      setErrorMessage("Please select a location");
+      setFormState("error");
+      return;
+    }
 
     try {
       const res = await fetch("/api/reports", {
@@ -38,7 +74,7 @@ export function ReportCowDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           description: description.trim() || null,
-          location: location.trim() || null,
+          location: finalLocation,
         }),
       });
 
@@ -53,7 +89,8 @@ export function ReportCowDialog({
       setTimeout(() => {
         setOpen(false);
         setDescription("");
-        setLocation("");
+        setLocationId("");
+        setCustomLocation("");
         setFormState("idle");
         onReportSubmitted?.();
       }, 1500);
@@ -71,7 +108,8 @@ export function ReportCowDialog({
     if (!nextOpen) {
       // Reset when closing
       setDescription("");
-      setLocation("");
+      setLocationId("");
+      setCustomLocation("");
       setFormState("idle");
       setErrorMessage("");
     }
@@ -111,16 +149,65 @@ export function ReportCowDialog({
               <label htmlFor="location" className="text-sm font-medium">
                 Where did you see it?
               </label>
-              <input
-                id="location"
-                type="text"
-                placeholder="e.g. Near the park entrance on Laureate Blvd"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+              <Select
+                value={locationId}
+                onValueChange={setLocationId}
                 disabled={formState === "submitting"}
-                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREDEFINED_LOCATIONS.map((loc) => (
+                    <SelectItem key={loc.id} value={loc.id}>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="size-3" />
+                        {loc.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                  {/*
+                  <SelectItem value={OTHER_LOCATION_ID}>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-3" />
+                      Other location
+                    </div>
+                  </SelectItem>
+                */}
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Show map preview for predefined locations */}
+            {selectedLocation && (
+              <div className="rounded-lg border overflow-hidden">
+                <LocationMap location={selectedLocation} />
+                <div className="bg-muted px-3 py-2 text-xs text-muted-foreground">
+                  1/2 mile radius shown
+                </div>
+              </div>
+            )}
+
+            {/* Show custom location text input if "Other" is selected */}
+            {isOtherSelected && (
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="custom-location"
+                  className="text-sm font-medium"
+                >
+                  Enter location
+                </label>
+                <input
+                  id="custom-location"
+                  type="text"
+                  placeholder="e.g. Near the park entrance on Laureate Blvd"
+                  value={customLocation}
+                  onChange={(e) => setCustomLocation(e.target.value)}
+                  disabled={formState === "submitting"}
+                  className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            )}
 
             <div className="flex flex-col gap-2">
               <label htmlFor="description" className="text-sm font-medium">

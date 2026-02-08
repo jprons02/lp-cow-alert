@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Clock, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  CheckCircle2,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import type { Report } from "@/lib/types";
 
 const statusConfig = {
@@ -88,7 +94,10 @@ export function AdminReportCard({
       </div>
 
       {report.location && (
-        <p className="text-sm font-medium mb-1">📍 {report.location}</p>
+        <p className="text-sm font-medium mb-1 flex items-center gap-1">
+          <MapPin className="size-4" />
+          {report.location}
+        </p>
       )}
 
       {report.description && (

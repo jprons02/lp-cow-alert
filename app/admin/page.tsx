@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle2,
+  MapPin,
 } from "lucide-react";
 import type { Report } from "@/lib/types";
 import Link from "next/link";
@@ -47,6 +48,23 @@ export default function AdminDashboard() {
     if (filter === "resolved") return report.status === "resolved";
     return true;
   });
+
+  // Group reports by location
+  const reportsByLocation = filteredReports.reduce(
+    (acc, report) => {
+      const location = report.location || "Unknown Location";
+      if (!acc[location]) {
+        acc[location] = [];
+      }
+      acc[location].push(report);
+      return acc;
+    },
+    {} as Record<string, Report[]>,
+  );
+
+  const locationGroups = Object.entries(reportsByLocation).sort(
+    ([, reportsA], [, reportsB]) => reportsB.length - reportsA.length,
+  );
 
   const activeCount = reports.filter((r) => r.status !== "resolved").length;
   const reportedCount = reports.filter((r) => r.status === "reported").length;
@@ -149,8 +167,8 @@ export default function AdminDashboard() {
             </Button>
           </div>
 
-          {/* Reports list */}
-          <section className="flex flex-col gap-3">
+          {/* Reports list grouped by location */}
+          <section className="flex flex-col gap-6">
             {loading ? (
               <div className="rounded-xl border p-8 text-center">
                 <div className="mx-auto size-8 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
@@ -163,12 +181,28 @@ export default function AdminDashboard() {
                 <p className="text-muted-foreground">No reports to display</p>
               </div>
             ) : (
-              filteredReports.map((report) => (
-                <AdminReportCard
-                  key={report.id}
-                  report={report}
-                  onStatusChange={fetchReports}
-                />
+              locationGroups.map(([location, locationReports]) => (
+                <div key={location} className="flex flex-col gap-3">
+                  {/* Location header */}
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                      <MapPin className="size-4" />
+                      {location}
+                    </h3>
+                    <Badge variant="secondary" className="text-xs">
+                      {locationReports.length}
+                    </Badge>
+                  </div>
+
+                  {/* Reports for this location */}
+                  {locationReports.map((report) => (
+                    <AdminReportCard
+                      key={report.id}
+                      report={report}
+                      onStatusChange={fetchReports}
+                    />
+                  ))}
+                </div>
               ))
             )}
           </section>
