@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { AdminReportCard } from "@/components/admin-report-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +12,42 @@ import {
   Clock,
   CheckCircle2,
   MapPin,
+  LogOut,
 } from "lucide-react";
 import type { Report } from "@/lib/types";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "resolved">("active");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check authentication
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push("/admin/login");
+      } else {
+        setCheckingAuth(false);
+      }
+    }
+    checkAuth();
+  }, [router]);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/admin/login");
+  }
 
   const fetchReports = useCallback(async () => {
     try {
@@ -72,6 +100,14 @@ export default function AdminDashboard() {
     (r) => r.status === "acknowledged",
   ).length;
 
+  if (checkingAuth) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-svh flex-col bg-background">
       {/* Header */}
@@ -83,16 +119,27 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-sm text-muted-foreground">Manage cow reports</p>
           </div>
-          <Link href="/">
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 cursor-pointer"
+              >
+                <Home className="size-4" />
+                Public View
+              </Button>
+            </Link>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="gap-2 cursor-pointer"
+              onClick={handleLogout}
+              className="gap-2"
             >
-              <Home className="size-4" />
-              Public View
+              <LogOut className="size-4" />
+              Logout
             </Button>
-          </Link>
+          </div>
         </div>
       </header>
 
