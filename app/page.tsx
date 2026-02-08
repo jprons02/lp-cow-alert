@@ -6,19 +6,12 @@ import {
   ActiveReportCard,
   NoActiveReports,
 } from "@/components/active-report-card";
-import { RefreshCw, MapPin, Shield } from "lucide-react";
+import { RefreshCw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import type { Report } from "@/lib/types";
+import { DemoAlert } from "@/components/alerts";
 
 export default function Home() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -133,12 +126,7 @@ export default function Home() {
           </p>
 
           {/* Disclaimer */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
-            <p className="text-xs text-amber-800 font-medium">
-              ⚠️ This website is not connected to notify the rancher. This is
-              just a demo.
-            </p>
-          </div>
+          <DemoAlert />
         </div>
       </main>
     </div>
