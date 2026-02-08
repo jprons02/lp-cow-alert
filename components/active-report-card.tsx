@@ -1,0 +1,91 @@
+import type { Report } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
+
+function getTimeSince(dateString: string): string {
+  const now = new Date();
+  const then = new Date(dateString);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+const statusConfig = {
+  reported: {
+    label: "Reported",
+    variant: "destructive" as const,
+    icon: AlertTriangle,
+    color: "text-red-600",
+    bg: "bg-red-50 border-red-200",
+    message: "A loose cow has been reported. The ranger has been notified.",
+  },
+  acknowledged: {
+    label: "Acknowledged",
+    variant: "default" as const,
+    icon: Clock,
+    color: "text-amber-600",
+    bg: "bg-amber-50 border-amber-200",
+    message: "The ranger is aware and responding.",
+  },
+  resolved: {
+    label: "Resolved",
+    variant: "secondary" as const,
+    icon: CheckCircle2,
+    color: "text-green-600",
+    bg: "bg-green-50 border-green-200",
+    message: "This has been resolved.",
+  },
+};
+
+export function ActiveReportCard({ report }: { report: Report }) {
+  const config = statusConfig[report.status];
+  const Icon = config.icon;
+
+  return (
+    <div className={`rounded-xl border p-5 ${config.bg}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Icon className={`size-5 ${config.color}`} />
+          <Badge variant={config.variant}>{config.label}</Badge>
+        </div>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
+          {getTimeSince(report.created_at)}
+        </span>
+      </div>
+
+      <p className={`mt-3 text-sm font-medium ${config.color}`}>
+        {config.message}
+      </p>
+
+      {report.location && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          📍 {report.location}
+        </p>
+      )}
+
+      {report.description && (
+        <p className="mt-1 text-sm text-muted-foreground">
+          {report.description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function NoActiveReports() {
+  return (
+    <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
+      <CheckCircle2 className="mx-auto size-10 text-green-500" />
+      <p className="mt-3 text-lg font-medium text-green-700">All clear!</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        No loose cows have been reported recently.
+      </p>
+    </div>
+  );
+}
