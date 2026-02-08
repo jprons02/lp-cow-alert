@@ -69,12 +69,6 @@ export function ActiveReportCard({ report }: { report: Report }) {
           {report.location}
         </p>
       )}
-
-      {report.description && (
-        <p className="mt-1 text-sm text-muted-foreground">
-          {report.description}
-        </p>
-      )}
     </div>
   );
 }

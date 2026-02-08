@@ -80,6 +80,11 @@ export function ReportCowDialog({
 
       if (!res.ok) {
         const data = await res.json();
+        if (res.status === 409) {
+          setErrorMessage(data.error);
+          setFormState("error");
+          return;
+        }
         throw new Error(data.error || "Failed to submit report");
       }
 

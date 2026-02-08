@@ -6,8 +6,10 @@ import {
   ActiveReportCard,
   NoActiveReports,
 } from "@/components/active-report-card";
-import { RefreshCw, MapPin } from "lucide-react";
+import { RefreshCw, MapPin, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import {
   Select,
   SelectContent,
@@ -22,7 +24,19 @@ export default function Home() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is logged in as admin
+  useEffect(() => {
+    async function checkAdminSession() {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setIsAdmin(!!session);
+    }
+    checkAdminSession();
+  }, []);
 
   const fetchActiveReports = useCallback(async () => {
     try {
@@ -30,18 +44,13 @@ export default function Home() {
       const data = await res.json();
       const activeReports = data.reports || [];
       setReports(activeReports);
-
-      // Set default selected location to the first one with reports
-      if (activeReports.length > 0 && !selectedLocation) {
-        setSelectedLocation(activeReports[0].location || "Unknown Location");
-      }
     } catch {
       console.error("Failed to fetch active reports");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedLocation]);
+  }, []);
 
   useEffect(() => {
     fetchActiveReports();
@@ -52,29 +61,23 @@ export default function Home() {
     fetchActiveReports();
   }
 
-  // Group reports by location
-  const reportsByLocation = reports.reduce(
-    (acc, report) => {
-      const location = report.location || "Unknown Location";
-      if (!acc[location]) {
-        acc[location] = [];
-      }
-      acc[location].push(report);
-      return acc;
-    },
-    {} as Record<string, Report[]>,
-  );
-
-  const locations = Object.keys(reportsByLocation).sort();
-  const hasMultipleLocations = locations.length > 1;
-
   return (
     <div className="flex min-h-svh flex-col bg-background">
       {/* Header */}
       <header className="border-b px-4 py-4">
-        <div className="mx-auto max-w-lg">
-          <h1 className="text-xl font-bold tracking-tight">🐄 Cow Alert</h1>
-          <p className="text-sm text-muted-foreground">Laureate Park</p>
+        <div className="mx-auto max-w-lg flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">🐄 Cow Alert</h1>
+            <p className="text-sm text-muted-foreground">Laureate Park</p>
+          </div>
+          {isAdmin && (
+            <Link href="/admin">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Shield />
+                Admin
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -110,41 +113,11 @@ export default function Home() {
             ) : reports.length === 0 ? (
               <NoActiveReports />
             ) : (
-              <>
-                {/* Location selector dropdown (only show if multiple locations) */}
-                {hasMultipleLocations && (
-                  <div className="mb-4">
-                    <Select
-                      value={selectedLocation}
-                      onValueChange={setSelectedLocation}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {locations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="size-4" />
-                              <span>{location}</span>
-                              <Badge variant="secondary" className="ml-auto">
-                                {reportsByLocation[location].length}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Show the most recent report for selected location */}
-                {selectedLocation && reportsByLocation[selectedLocation] && (
-                  <ActiveReportCard
-                    report={reportsByLocation[selectedLocation][0]}
-                  />
-                )}
-              </>
+              <div className="flex flex-col gap-4">
+                {reports.map((report) => (
+                  <ActiveReportCard key={report.id} report={report} />
+                ))}
+              </div>
             )}
           </section>
 
