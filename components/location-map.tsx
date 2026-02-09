@@ -32,9 +32,16 @@ export function LocationMap({ location }: { location: Location }) {
   return (
     <MapContainer
       center={[lat, lng]}
-      zoom={13}
-      style={{ height: "300px", width: "100%" }}
+      zoom={14}
+      style={{ height: "200px", minHeight: "200px", width: "100%" }}
       className="rounded-lg z-0"
+      dragging={false}
+      touchZoom={false}
+      scrollWheelZoom={false}
+      doubleClickZoom={false}
+      boxZoom={false}
+      keyboard={false}
+      zoomControl={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
