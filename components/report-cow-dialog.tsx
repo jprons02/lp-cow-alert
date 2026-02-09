@@ -30,7 +30,14 @@ import dynamic from "next/dynamic";
 
 const LocationMap = dynamic(
   () => import("@/components/location-map").then((mod) => mod.LocationMap),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[200px] w-full bg-muted flex items-center justify-center">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  },
 );
 
 type FormState = "idle" | "submitting" | "success" | "error";
@@ -149,7 +156,7 @@ export function ReportCowDialog({
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col gap-2">
               <label htmlFor="location" className="text-sm font-medium">
                 Where did you see it?
@@ -186,10 +193,7 @@ export function ReportCowDialog({
             {/* Show map preview for predefined locations */}
             {selectedLocation && (
               <div className="rounded-lg border overflow-hidden">
-                <LocationMap location={selectedLocation} />
-                <div className="bg-muted px-3 py-2 text-xs text-muted-foreground">
-                  1/2 mile radius shown
-                </div>
+                <LocationMap key={locationId} location={selectedLocation} />
               </div>
             )}
 
