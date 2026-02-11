@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { notifyRangersOfNewReport } from "@/lib/twilio";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -44,7 +45,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO: Send SMS notification to ranger via Twilio
+    // Send SMS notification to ranger via Twilio (non-blocking)
+    notifyRangersOfNewReport(location, description).catch((err) => {
+      console.error("Failed to send Twilio notification:", err);
+    });
 
     return NextResponse.json({ report: data }, { status: 201 });
   } catch (err) {
