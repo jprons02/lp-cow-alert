@@ -138,7 +138,7 @@ export function ReportCowDialog({
           Report a Loose Cow
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Report a Loose Cow</DialogTitle>
           <DialogDescription>
@@ -156,7 +156,7 @@ export function ReportCowDialog({
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-auto">
+          <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
               <label htmlFor="location" className="text-sm font-medium">
                 Where did you see it?
