@@ -156,7 +156,7 @@ export function ReportCowDialog({
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-auto">
+          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-scroll">
             <div className="flex flex-col gap-2">
               <label htmlFor="location" className="text-sm font-medium">
                 Where did you see it?
@@ -192,7 +192,7 @@ export function ReportCowDialog({
 
             {/* Show map preview for predefined locations */}
             {selectedLocation && (
-              <div className="rounded-lg border overflow-hidden">
+              <div className="rounded-lg border overflow-hidden h-[200px] min-h-[200px]">
                 <LocationMap key={locationId} location={selectedLocation} />
               </div>
             )}
