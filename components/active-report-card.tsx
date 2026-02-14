@@ -21,24 +21,24 @@ const statusConfig = {
     label: "Reported",
     variant: "destructive" as const,
     icon: AlertTriangle,
-    color: "text-red-600",
-    bg: "bg-red-50 border-red-200",
+    color: "text-destructive",
+    bg: "bg-destructive/10 border-destructive/25",
     message: "A loose cow has been reported. The ranger has been notified.",
   },
   acknowledged: {
     label: "Acknowledged",
     variant: "default" as const,
     icon: Clock,
-    color: "text-amber-600",
-    bg: "bg-amber-50 border-amber-200",
+    color: "text-chart-5",
+    bg: "bg-chart-5/10 border-chart-5/25",
     message: "The ranger is aware and responding.",
   },
   resolved: {
     label: "Resolved",
     variant: "secondary" as const,
     icon: CheckCircle2,
-    color: "text-green-600",
-    bg: "bg-green-50 border-green-200",
+    color: "text-primary",
+    bg: "bg-primary/10 border-primary/20",
     message: "This has been resolved.",
   },
 };
@@ -75,9 +75,9 @@ export function ActiveReportCard({ report }: { report: Report }) {
 
 export function NoActiveReports() {
   return (
-    <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
-      <CheckCircle2 className="mx-auto size-10 text-green-500" />
-      <p className="mt-3 text-lg font-medium text-green-700">All clear!</p>
+    <div className="rounded-xl border border-primary/20 bg-primary/8 p-6 text-center">
+      <CheckCircle2 className="mx-auto size-10 text-primary" />
+      <p className="mt-3 text-lg font-medium text-primary">All clear!</p>
       <p className="mt-1 text-sm text-muted-foreground">
         No loose cows have been reported recently.
       </p>

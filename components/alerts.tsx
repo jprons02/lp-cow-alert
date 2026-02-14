@@ -3,7 +3,7 @@ import { TriangleAlert } from "lucide-react";
 
 export function DemoAlert() {
   return (
-    <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+    <Alert className="border-accent bg-accent/50 text-muted-foreground dark:border-accent dark:bg-accent/30 dark:text-muted-foreground">
       <TriangleAlert className="size-4" />
       <AlertDescription>
         This website is not connected to notify the rancher. This is just a

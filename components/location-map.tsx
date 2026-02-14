@@ -32,7 +32,7 @@ export function LocationMap({ location }: { location: Location }) {
   return (
     <MapContainer
       center={[lat, lng]}
-      zoom={14}
+      zoom={13}
       style={{ height: "200px", minHeight: "200px", width: "100%" }}
       className="rounded-lg z-0"
       dragging={false}
