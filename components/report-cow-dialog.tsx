@@ -132,7 +132,7 @@ export function ReportCowDialog({
       <DialogTrigger asChild>
         <Button
           size="lg"
-          className="w-full text-base gap-2 h-14 rounded-xl cursor-pointer"
+          className="w-full text-base gap-2 h-14 rounded-xl cursor-pointer shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:shadow-md transition-all"
         >
           <Megaphone className="size-5" />
           Report a Loose Cow
