@@ -156,7 +156,7 @@ export function ReportCowDialog({
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-scroll">
+          <div className="flex flex-col gap-4 py-2 max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col gap-2">
               <label htmlFor="location" className="text-sm font-medium">
                 Where did you see it?
