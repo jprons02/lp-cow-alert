@@ -12,7 +12,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("reports")
-      .select("*")
+      .select("id, description, location, status, created_at, resolved_at")
       .in("status", ["reported", "acknowledged"])
       .gte("created_at", twentyFourHoursAgo)
       .order("created_at", { ascending: false });

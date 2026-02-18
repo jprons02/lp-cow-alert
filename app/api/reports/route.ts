@@ -1,10 +1,85 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { detectCow } from "@/lib/cow-detection";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { isWithinRange, MAX_DISTANCE_MILES } from "@/lib/geolocation";
+import { getLocationByName } from "@/lib/locations";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { description, location } = body;
+    const {
+      description,
+      location,
+      photo,
+      fingerprint,
+      reporterLat,
+      reporterLng,
+    } = body;
+
+    // --- Validate required fields ---
+    if (!location) {
+      return NextResponse.json(
+        { error: "Location is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!photo) {
+      return NextResponse.json({ error: "Photo is required" }, { status: 400 });
+    }
+
+    if (!fingerprint) {
+      return NextResponse.json(
+        { error: "Device identification failed" },
+        { status: 400 },
+      );
+    }
+
+    // --- Rate limiting (fingerprint + IP) ---
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+
+    const rateLimit = await checkRateLimit(fingerprint, ip);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ error: rateLimit.reason }, { status: 429 });
+    }
+
+    // --- GPS proximity check ---
+    const matchedLocation = getLocationByName(location);
+    if (matchedLocation && reporterLat != null && reporterLng != null) {
+      if (
+        !isWithinRange(
+          reporterLat,
+          reporterLng,
+          matchedLocation.lat,
+          matchedLocation.lng,
+          MAX_DISTANCE_MILES,
+        )
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "You appear to be too far from the reported location. Please report from near where you see the cow.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    // --- Cow detection ---
+    const detection = await detectCow(photo);
+    if (!detection.isCow) {
+      return NextResponse.json(
+        {
+          error:
+            "We couldn't detect a cow in your photo. Please take a clearer photo.",
+        },
+        { status: 400 },
+      );
+    }
 
     const supabase = await createAdminClient();
 
@@ -26,14 +101,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Strip data-url prefix before storing
+    const photoData = photo.replace(/^data:image\/\w+;base64,/, "");
+
     const { data, error } = await supabase
       .from("reports")
       .insert({
         description: description || null,
-        location: location || null,
+        location,
         status: "reported",
+        photo_base64: photoData,
+        fingerprint,
+        ip_address: ip,
+        reporter_lat: reporterLat ?? null,
+        reporter_lng: reporterLng ?? null,
       })
-      .select()
+      .select("id, description, location, status, created_at, resolved_at")
       .single();
 
     if (error) {
@@ -64,7 +147,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("reports")
-      .select("*")
+      .select("id, description, location, status, created_at, resolved_at")
       .in("status", ["reported", "acknowledged"])
       .gte("created_at", twentyFourHoursAgo)
       .order("created_at", { ascending: false })
