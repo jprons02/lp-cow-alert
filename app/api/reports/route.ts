@@ -4,6 +4,7 @@ import { detectCow } from "@/lib/cow-detection";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isWithinRange, MAX_DISTANCE_MILES } from "@/lib/geolocation";
 import { getLocationByName } from "@/lib/locations";
+import { sendReportNotification } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -127,7 +128,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO: Send SMS notification to ranger via Twilio
+    // Send email notification to ranger(s)
+    sendReportNotification({
+      reportId: data.id,
+      location: data.location ?? "Unknown location",
+      description: data.description,
+    });
 
     return NextResponse.json({ report: data }, { status: 201 });
   } catch (err) {
