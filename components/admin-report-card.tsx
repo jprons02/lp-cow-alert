@@ -100,6 +100,17 @@ export function AdminReportCard({
         </p>
       )}
 
+      {report.photo_base64 && (
+        <div className="my-2 rounded-lg overflow-hidden border">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`data:image/jpeg;base64,${report.photo_base64}`}
+            alt="Reported cow photo"
+            className="w-full h-48 object-cover"
+          />
+        </div>
+      )}
+
       {report.description && (
         <p className="text-sm text-muted-foreground mb-3">
           {report.description}

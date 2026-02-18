@@ -7,4 +7,9 @@ export interface Report {
   status: ReportStatus;
   created_at: string;
   resolved_at: string | null;
+  photo_base64: string | null;
+  fingerprint: string | null;
+  ip_address: string | null;
+  reporter_lat: number | null;
+  reporter_lng: number | null;
 }
