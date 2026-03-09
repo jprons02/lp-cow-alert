@@ -7,8 +7,8 @@ interface RateLimitResult {
 
 /**
  * Check if a device/IP is allowed to submit a report today.
- * - 1 report per device fingerprint per day (strict)
- * - 2 reports per IP per day (accounts for shared networks / households)
+ * - 2 reports per device fingerprint per day
+ * - 4 reports per IP per day (accounts for shared networks / households)
  */
 export async function checkRateLimit(
   fingerprint: string,
@@ -21,29 +21,29 @@ export async function checkRateLimit(
   today.setUTCHours(0, 0, 0, 0);
   const todayStr = today.toISOString();
 
-  // Check by fingerprint — strict 1 per day
+  // Check by fingerprint — 2 per day
   const { count: fingerprintCount } = await supabase
     .from("reports")
     .select("*", { count: "exact", head: true })
     .eq("fingerprint", fingerprint)
     .gte("created_at", todayStr);
 
-  if (fingerprintCount && fingerprintCount >= 1) {
+  if (fingerprintCount && fingerprintCount >= 2) {
     return {
       allowed: false,
       reason:
-        "You have already submitted a report today. Please try again tomorrow.",
+        "You have already submitted 2 reports today. Please try again tomorrow.",
     };
   }
 
-  // Check by IP — allow 2 per IP (shared networks)
+  // Check by IP — allow 4 per IP (shared networks)
   const { count: ipCount } = await supabase
     .from("reports")
     .select("*", { count: "exact", head: true })
     .eq("ip_address", ipAddress)
     .gte("created_at", todayStr);
 
-  if (ipCount && ipCount >= 2) {
+  if (ipCount && ipCount >= 4) {
     return {
       allowed: false,
       reason: "Report limit reached from this network today.",
